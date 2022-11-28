@@ -37,7 +37,7 @@ pub fn hash_to_scalar(msg: &[u8], count: usize, dst: &[u8], scalars: &mut Vec<Sc
 }
 
 /*
- Get a random seed of 32 bytes (the length of a scalar) 
+ Get a random seed of 32 bytes (the length of a scalar)
 */
 pub fn get_random_seed() -> [u8; SCALAR_LEN] {
     let mut buf = [0u8; SCALAR_LEN];
