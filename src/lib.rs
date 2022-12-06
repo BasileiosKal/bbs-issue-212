@@ -8,6 +8,7 @@ use utils::{scalars_from_random_bytes, hash_to_scalar, get_random_seed};
 use constants::{EXPAND_LEN, SCALAR_LEN, MAX_BYTES_NUM};
 
 const DST: &[u8; 5] = b"a dst";
+use rand;
 
 /* 
  Call the PRF in a loop. Get 48 bytes and reduce mod the group order 
@@ -44,7 +45,7 @@ pub fn expand_message_in_loop<'a>(count: usize) -> Vec<Scalar> {
         let mut expander = ExpandMsgXmd::<Sha256>::init_expand(&buf, &dst_next, count_prime * EXPAND_LEN + DST_BYTES_NUM);
 
         // get count_prime scalars by iterating through the expander
-        rand_scalars = scalars_from_random_bytes(count_prime, &mut expander, &mut rand_scalars);
+        scalars_from_random_bytes(count_prime, &mut expander, &mut rand_scalars);
 
         // read remaining 250 bytes to get the next dst
         let tmp = expander.into_vec();
@@ -53,7 +54,7 @@ pub fn expand_message_in_loop<'a>(count: usize) -> Vec<Scalar> {
 
     // get the remaining random scalars
     let mut expander = ExpandMsgXmd::<Sha256>::init_expand(&buf, &dst_next, EXPAND_LEN * (count % count_prime));
-    rand_scalars = scalars_from_random_bytes(count % count_prime, &mut expander,  &mut rand_scalars);
+    scalars_from_random_bytes(count % count_prime, &mut expander,  &mut rand_scalars);
 
     rand_scalars
 }
@@ -77,12 +78,12 @@ pub fn expand_message_and_prf_in_loop(count: usize) -> Vec<Scalar> {
 
         // get the maximum number of scalars from that seed (adding them to
         // the scalars list)
-        scalars = hash_to_scalar(&buf, max_count, DST, &mut scalars);
+        hash_to_scalar(&buf, max_count, DST, &mut scalars);
     }
 
     // get the remaining scalars and add them to the scalars list
     let buf: [u8; SCALAR_LEN] = get_random_seed();
-    scalars = hash_to_scalar(&buf, count % max_count, DST, &mut scalars);
+    hash_to_scalar(&buf, count % max_count, DST, &mut scalars);
 
     scalars
 }
